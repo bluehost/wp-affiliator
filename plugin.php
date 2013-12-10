@@ -2,7 +2,7 @@
 /*
 Plugin Name: Bluehost Affiliator
 Description: This plugin makes it easy for you to add Bluehost affiliate banners to posts using a Bluehost icon above the editor.  You can also add static banners to the sidebar with the widget.  To get started insert your Bluehost Affiliate Username under <a href="options-general.php">Settings -> General</a>
-Version: 1.0.1
+Version: 1.0.2
 Author: Mike Hansen
 Author URI: http://mikehansen.me
 License: GPLv2 or later
@@ -154,7 +154,7 @@ function bha_shortcode( $atts ) {
 	}
 	$aff_link = bha_get_link( $id  );
 	$img_srcs = bha_image_sizes();
-	return "<a href='" . $aff_link . "'><img class='" . $atts['align'] . "' src='http://img.bluehost.com/" . $img_srcs[ $atts['size'] ][ $atts['variation'] ] . "' /></a>";
+	return "<a href='" . $aff_link . "' target='_blank'><img class='" . $atts['align'] . "' src='http://img.bluehost.com/" . $img_srcs[ $atts['size'] ][ $atts['variation'] ] . "' /></a>";
 }
 add_shortcode( 'bha', 'bha_shortcode' );
 
@@ -529,7 +529,7 @@ class BHA_Widget extends WP_Widget {
 			$align = "";
 		}
 		$bha_img_links = bha_image_sizes();
-		echo "<a href='" . bha_get_link( $id ) . "'><img " . $align . "src='http://img.bluehost.com" . $bha_img_links[$size][$variation] . "' style='max-width:100%;'/></a>";
+		echo "<a href='" . bha_get_link( $id ) . "' target='_blank'><img " . $align . "src='http://img.bluehost.com" . $bha_img_links[$size][$variation] . "' style='max-width:100%;'/></a>";
 		echo $args['after_widget'];
 	}
 }
