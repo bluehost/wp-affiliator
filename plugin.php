@@ -13,8 +13,8 @@ function bha_add_button( $icons ) {
 	$img = plugins_url( 'bh-icon-24.png' , __FILE__ );
 	$id = 'bha_popup_container';
 	$title = 'Bluehost Affiliator Library';
-	$icons .= "<a style='position:relative;bottom:1px;' class='thickbox' title='{$title}'
-	href='#TB_inline?width=640&inlineId={$id}'>
+	$icons .= "<a style='position:relative;bottom:1px;' class='thickbox' title='" . $title . "'
+	href='#TB_inline?width=640&inlineId=" . $id . "'>
 	<img src='". $img . "' /></a>";
 	return $icons;
 }
@@ -49,12 +49,6 @@ function bha_add_inline_popup_content() {
 			<option value="alignright">Right</option>
 			<option value="aligncenter">Center</option>
 	</select><br/>
-	<label for="bha-img-position">Position : </label>
-	<select name="bha-img-position" class="bha-img-position">
-			<option value="before" selected="selected">Before Content</option>
-			<option value="after">After Content</option>
-	</select>
-	<br/>
 	<label for="bha-img-id">Tracking Code<small>(optional)</small> : </label>
 	<input type="text" name="bha-img-id" class="bha-img-id" />
 	<br/><br/>
@@ -110,22 +104,9 @@ jQuery( document ).ready( function() {
 		e.preventDefault();
 		var shortcode = bha_build_shortcode();
 		var position = jQuery( '.bha-img-position' ).val();
-		if( jQuery( '#wp-content-wrap' ).hasClass( 'tmce-active' ) ) {
-			if( position == 'after' ) {
-				parent.tinyMCE.activeEditor.setContent( parent.tinyMCE.activeEditor.getContent() + shortcode );
-			} else {
-				parent.tinyMCE.activeEditor.setContent( shortcode + parent.tinyMCE.activeEditor.getContent() );
-			}
-		} else {
-			var content = jQuery( 'textarea#content' ).val();
-			if( position == 'after' ) {
-				jQuery( 'textarea#content' ).val( content + "\n" + shortcode );
-			} else {
-				jQuery( 'textarea#content' ).val( shortcode + "\n" + content );
-			}
-		}
+		window.parent.send_to_editor( shortcode );
 		//Close window
-		parent.jQuery( '#TB_closeWindowButton' ).click();
+		parent.tb_remove();
 	} );
 } );
 </script>
