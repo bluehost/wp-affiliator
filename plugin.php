@@ -124,7 +124,6 @@ function bha_shortcode( $atts ) {
 		'size'		=> '100x100',
 		'variation' => '1',
 		'align'		=> 'none',
-		'position'	=> 'before',
 		'id'		=> ''
 	);
 	$atts = wp_parse_args( $atts, $defaults );
