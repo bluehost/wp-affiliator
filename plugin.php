@@ -64,7 +64,6 @@ add_action( 'admin_footer-page-new.php', 'bha_add_inline_popup_content' );
 add_action( 'admin_footer-post.php', 'bha_add_inline_popup_content' );
 add_action( 'admin_footer-page.php', 'bha_add_inline_popup_content' );
 add_action( 'admin_footer-widgets.php', 'bha_add_inline_popup_content' );
-add_action( 'admin_footer-index.php', 'bha_add_inline_popup_content' );
 
 
 function bha_img_js() {
@@ -119,7 +118,6 @@ add_action( 'admin_footer-page-new.php', 'bha_img_js' );
 add_action( 'admin_footer-post.php', 'bha_img_js' );
 add_action( 'admin_footer-page.php', 'bha_img_js' );
 add_action( 'admin_footer-widgets.php', 'bha_img_js' );
-add_action( 'admin_footer-index.php', 'bha_img_js' );
 
 function bha_shortcode( $atts ) {
 	$defaults = array(
