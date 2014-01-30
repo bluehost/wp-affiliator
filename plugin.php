@@ -4,9 +4,11 @@ Plugin Name: Bluehost Affiliator
 Description: This plugin makes it easy for you to add Bluehost affiliate banners to posts using a Bluehost icon above the editor.  You can also add static banners to the sidebar with the widget.  To get started insert your Bluehost Affiliate Username under <a href="options-general.php">Settings -> General</a>
 Version: 1.0.2
 Author: Mike Hansen
-Author URI: http://mikehansen.me
+Author URI: http://mikehansen.me?utm_source=bha_wp_plugin
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
+GitHub Plugin URI: bluehost/wp-affiliator
+GitHub Branch: master
 */
 
 function bha_add_button( $icons ) {
@@ -518,3 +520,20 @@ function register_bha_widget() {
 	register_widget( 'BHA_Widget' );
 }
 add_action( 'widgets_init', 'register_bha_widget' );
+
+// Load base classes for github updater
+if ( is_admin() ) {
+	/*
+	Check class_exist because this could be loaded in a different plugin
+	*/
+	if( ! class_exists( 'GitHub_Updater' ) ) { 
+		require_once( plugin_dir_path( __FILE__ ) . 'updater/class-github-updater.php' );
+	}
+	if( ! class_exists( 'GitHub_Updater_GitHub_API' ) ) {
+		require_once( plugin_dir_path( __FILE__ ) . 'updater/class-github-api.php' );
+	}
+	if( ! class_exists( 'GitHub_Plugin_Updater' ) ) {
+		require_once( plugin_dir_path( __FILE__ ) . 'updater/class-plugin-updater.php' );
+	}
+	new GitHub_Plugin_Updater;
+}
