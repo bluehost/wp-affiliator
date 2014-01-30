@@ -2,7 +2,7 @@
 /*
 Plugin Name: Bluehost Affiliator
 Description: This plugin makes it easy for you to add Bluehost affiliate banners to posts using a Bluehost icon above the editor.  You can also add static banners to the sidebar with the widget.  To get started insert your Bluehost Affiliate Username under <a href="options-general.php">Settings -> General</a>
-Version: 1.0.2
+Version: 1.0.3
 Author: Mike Hansen
 Author URI: http://mikehansen.me?utm_source=bha_wp_plugin
 License: GPLv2 or later
@@ -15,7 +15,7 @@ function bha_add_button( $icons ) {
 	$img = plugins_url( 'bh-icon-24.png' , __FILE__ );
 	$id = 'bha_popup_container';
 	$title = 'Bluehost Affiliator Library';
-	$icons .= "<a style='position:relative;bottom:1px;' class='thickbox' title='" . $title . "'
+	$icons .= "<a style='position:relative;bottom:-1px;' class='thickbox' title='" . $title . "'
 	href='#TB_inline?width=640&inlineId=" . $id . "'>
 	<img src='". $img . "' /></a>";
 	return $icons;
