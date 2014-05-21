@@ -1,21 +1,28 @@
 <?php
 /*
 Plugin Name: Bluehost Affiliator
-Description: This plugin makes it easy for you to add Bluehost affiliate banners to posts using a Bluehost icon above the editor.  You can also add static banners to the sidebar with the widget.  To get started insert your Bluehost Affiliate Username under <a href="options-general.php">Settings -> General</a>
+Description: This plugin makes it easy for you to add Bluehost affiliate banners to posts using a Bluehost icon above the editor.  You can also add static banners to the sidebar with the widget.  To get started insert your Bluehost Affiliate Username under Settings -> General.
 Version: 1.0.3
 Author: Mike Hansen
-Author URI: http://mikehansen.me?utm_source=bha_wp_plugin
+Author URI: http://mikehansen.me
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
-GitHub Plugin URI: bluehost/wp-affiliator
-GitHub Branch: master
 */
+
+function bha_plugin_action_links( $links, $file ) {
+	if ( $file == plugin_basename( dirname(__FILE__).'/plugin.php' ) ) {
+		$links[] = '<a href="' . admin_url( 'options-general.php' ) . '">' . __( 'Settings' ) . '</a>';
+	}
+	return $links;
+}
+
+add_filter( 'plugin_action_links', 'bha_plugin_action_links', 10, 2 );
 
 function bha_add_button( $icons ) {
 	$img = plugins_url( 'bh-icon-24.png' , __FILE__ );
 	$id = 'bha_popup_container';
 	$title = 'Bluehost Affiliator Library';
-	$icons .= "<a style='position:relative;bottom:-1px;' class='thickbox' title='" . $title . "'
+	$icons .= "<a style='position:relative;bottom:1px;' class='thickbox' title='" . $title . "'
 	href='#TB_inline?width=640&inlineId=" . $id . "'>
 	<img src='". $img . "' /></a>";
 	return $icons;
@@ -64,6 +71,7 @@ add_action( 'admin_footer-page-new.php', 'bha_add_inline_popup_content' );
 add_action( 'admin_footer-post.php', 'bha_add_inline_popup_content' );
 add_action( 'admin_footer-page.php', 'bha_add_inline_popup_content' );
 add_action( 'admin_footer-widgets.php', 'bha_add_inline_popup_content' );
+add_action( 'admin_footer-index.php', 'bha_add_inline_popup_content' );
 
 
 function bha_img_js() {
@@ -118,12 +126,14 @@ add_action( 'admin_footer-page-new.php', 'bha_img_js' );
 add_action( 'admin_footer-post.php', 'bha_img_js' );
 add_action( 'admin_footer-page.php', 'bha_img_js' );
 add_action( 'admin_footer-widgets.php', 'bha_img_js' );
+add_action( 'admin_footer-index.php', 'bha_img_js' );
 
 function bha_shortcode( $atts ) {
 	$defaults = array(
 		'size'		=> '100x100',
 		'variation' => '1',
 		'align'		=> 'none',
+		'position'	=> 'before',
 		'id'		=> ''
 	);
 	$atts = wp_parse_args( $atts, $defaults );
@@ -518,20 +528,3 @@ function register_bha_widget() {
 	register_widget( 'BHA_Widget' );
 }
 add_action( 'widgets_init', 'register_bha_widget' );
-
-// Load base classes for github updater
-if ( is_admin() ) {
-	/*
-	Check class_exist because this could be loaded in a different plugin
-	*/
-	if( ! class_exists( 'GitHub_Updater' ) ) { 
-		require_once( plugin_dir_path( __FILE__ ) . 'updater/class-github-updater.php' );
-	}
-	if( ! class_exists( 'GitHub_Updater_GitHub_API' ) ) {
-		require_once( plugin_dir_path( __FILE__ ) . 'updater/class-github-api.php' );
-	}
-	if( ! class_exists( 'GitHub_Plugin_Updater' ) ) {
-		require_once( plugin_dir_path( __FILE__ ) . 'updater/class-plugin-updater.php' );
-	}
-	new GitHub_Plugin_Updater;
-}
