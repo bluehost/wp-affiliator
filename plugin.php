@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Bluehost Affiliator
-Description: This plugin makes it easy for you to add Bluehost affiliate banners to posts using a Bluehost icon above the editor.  You can also add static banners to the sidebar with the widget.  To get started insert your Bluehost Affiliate Username under Settings -> General.
+Description: This plugin makes it easy for you to add Bluehost affiliate banners to posts using a Bluehost icon above the editor.  You can also add static banners to the sidebar with the widget.  To get started insert your Bluehost Affiliate Username under Settings -> General or <a href="#bha-fancy-content">click here</a>.
 Version: 1.0.4
 Author: Mike Hansen
 Author URI: http://mikehansen.me?utm_source=bha_wp_plugin
@@ -158,18 +158,8 @@ function bha_shortcode( $atts ) {
 add_shortcode( 'bha', 'bha_shortcode' );
 
 function bha_user_field_callback() {
-	$value = get_option( 'bha_username', bha_guess_username() );
+	$value = get_option( 'bha_username' );
 	echo '<input type="text" name="bha_username" value="' . esc_attr( $value ) . '" />';
-}
-
-function bha_guess_username() {
-	$current_dir = dirname( __FILE__ );
-	$piece = explode( '/', $current_dir );
-	if( count( $piece ) > 2 ) {
-		return $piece[2];
-	} else {
-		return "";
-	}
 }
 
 function bha_create_settings() {
@@ -184,7 +174,7 @@ function bha_create_settings() {
 add_action( 'admin_init', 'bha_create_settings' );
 
 function bha_get_link( $id = null ) {
-	$user = get_option( 'bha_username', bha_guess_username() );
+	$user = get_option( 'bha_username' );
 	$url = get_site_url() . "?bha=true&user=" . $user;
 	if( ! is_null( $id ) ) {
 		$url .= "&id=" . $id;
@@ -240,14 +230,14 @@ add_action( 'admin_head-index.php', 'bha_admin_styles' );
 
 function bha_image_base() {
 	$base = "http://bluehost-cdn.com/media/partner/images/";
-	$base .= get_option( 'bha_username', bha_guess_username() ) . "/";
+	$base .= get_option( 'bha_username', 'house' ) . "/";
 	return $base;
 }
 
 function bha_get_image_link( $size = "120x120", $variant = '03' ) {
 	$base = bha_image_base();
 	$url = "https://bluehost-cdn.com/media/partner/images/";
-	$user = get_option( 'bha_username', bha_guess_username() );
+	$user = get_option( 'bha_username', 'house' );
 	$images = bha_image_sizes();
 	if( isset( $images[ $size ][ $variant ] ) ) {
 		$image = $images[ $size ][ $variant ];
@@ -285,6 +275,161 @@ function bha_image_sizes() {
 	}
 	return $images;
 }
+
+function bha_fancy_enqueue() {
+	wp_enqueue_style( 'bha-fancy-styles', plugins_url( '/fancy/jquery.fancybox.css' , __FILE__ ) );
+	wp_enqueue_script( 'bha-fancy-script', plugins_url( '/fancy/jquery.fancybox.js' , __FILE__ ), array( 'jquery' ) );
+}
+add_action( 'admin_enqueue_scripts', 'bha_fancy_enqueue' );
+
+function bha_activation() {
+	set_transient( 'bha_show_popup', true, 30 );
+}
+register_activation_hook( __FILE__, 'bha_activation' );
+
+function bha_fancy_script() {
+	?>
+	<style type="text/css">
+	#bha-fancy-content form {
+		margin: 0 3%;
+		width: 93%;
+	}
+	#bha-fancy-content input[type="text"] {
+		width: 100%;
+		font-size: 1.8rem;
+		padding: 8px 18px;
+		text-align: center;
+		width: 100%;
+	}
+	#bha-fancy-content input[type="submit"] {
+		width: 100%;
+		background: linear-gradient(to right, #62bc33 0%, #8bd331 100%) repeat scroll 0 0 rgba(0, 0, 0, 0);
+		border: medium none;
+		border-radius: 5px;
+		box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+		color: #fff;
+		font-size: 1.8em;
+		line-height: 1.5em;
+		margin: 10px 0;
+		padding: 0.25em 1em;
+		cursor: pointer;
+	}
+	#bha-fancy-content input[type="submit"]:hover {
+		background: none repeat scroll 0 0 #8bd331;
+	}
+	</style>
+	<script type="text/javascript">
+		jQuery( document ).ready( function( $ ) {
+			$( '#bluehost-affiliator .plugin-description a' ).fancybox();
+			$( 'a.bha-set-aff' ).fancybox();
+
+			<?php 
+			if( get_transient( 'bha_show_popup' ) ) {
+				?>
+			$( '#bluehost-affiliator .plugin-description a' ).click();
+				<?php
+			}
+			?>
+
+			$( '#bha-fancy-content form' ).submit( function ( e ) {
+				e.preventDefault();
+				
+				$( '#bha-ajax-message' ).removeClass( 'error updated' );
+				$( '#bha-ajax-message' ).html( '' );
+
+				var data = {
+					'action': 'bha_set_aff_id_ajax',
+					'aff_id': $( '#bha-aff-id' ).val()
+				}
+
+				var url = '<?php echo admin_url( 'admin-ajax.php' );?>';
+
+				$.post( url, data, function( result ) {
+					result = $.parseJSON( result );
+					
+					$( '#bha-ajax-message' ).addClass( result.response );
+					$( '#bha-ajax-message' ).html( "<p>" + result.message + "</p>" );
+					$( '#bha-ajax-message' ).show( 'slow' );
+					if( result.response == 'updated' ) {
+						$( '#bha-aff-id' ).val( result.username );
+						setTimeout( function () {
+							$( '#ajax-message' ).hide();
+							$( '.fancybox-close' ).click();
+							$( '#bha-ajax-message' ).removeClass( 'error updated' );
+							$( '#bha-ajax-message' ).html( '' );
+						}, 5000 );
+					}
+				} );
+
+			} );
+		} );
+	</script>
+	<?php
+}
+add_action( 'admin_head-plugins.php', 'bha_fancy_script' );
+
+function bha_set_aff_id_ajax() {
+	$result = array( 'response' => 'error' );
+	if( isset( $_POST['aff_id'] ) && strlen( $_POST['aff_id'] ) > 1 ) {
+		$aff_id = wp_kses( $_POST['aff_id'], array() );
+		if( update_option( 'bha_username', $aff_id ) ) {
+			$result['response'] = 'updated';
+			$result['message'] = 'Affiliate ID Updated';
+			$result['username'] = $aff_id;
+		} else {
+			$result['message'] = 'Affiliate ID was same or unable to update';
+		}
+	} else {
+		 $result['message'] = 'Affiliate ID was not set';
+	}
+	$result = json_encode( $result );
+	echo $result;
+	die();
+}
+add_action( 'wp_ajax_bha_set_aff_id_ajax', 'bha_set_aff_id_ajax' );
+
+function bha_fancy_content() {
+	?>
+	<div id="bha-fancy-content" style="display:none; min-height: 300px;">
+		<br/><br/>
+		<div id="bha-ajax-message" style="display: none;"></div>
+		<form>
+			<input type="text" name="bha-aff-id" id="bha-aff-id" value="<?php echo get_option( 'bha_username' ); ?>" placeholder="Affiliate Username"/>
+			<input type="submit" value="Set Affiliate ID" />
+		</form>
+	</div>
+	<?php
+}
+add_action( 'admin_footer', 'bha_fancy_content' );
+
+function bha_guess_username() {
+	//notice do not use this.. it is only used to notify previous users
+	$current_dir = dirname( __FILE__ );
+	$piece = explode( '/', $current_dir );
+	if( count( $piece ) > 2 ) {
+		return $piece[2];
+	} else {
+		return "";
+	}
+}
+
+function bha_notify_cpanel_user() {
+	$bh_aff = get_option( 'bha_username' );
+	$guess_aff = bha_guess_username();
+	if( $bh_aff == $guess_aff || $bh_aff == "" ) {
+		echo "<div class='updated' style='border-left: 4px solid #3575B9;'><p>Your Bluehost affiliate ID is invalid or not set. <a class='bha-set-aff' href='#bha-fancy-content'>Set Affiliate Username</a></p></div>";
+	}
+}
+
+function bha_notify_scripts() {
+	$bh_aff = get_option( 'bha_username' );
+	$guess_aff = bha_guess_username();
+	if( $bh_aff == $guess_aff || $bh_aff == "" ) {
+		add_action( 'admin_notices', 'bha_notify_cpanel_user' );
+		add_action( 'admin_head', 'bha_fancy_script' );
+	}
+}
+add_action( 'admin_init', 'bha_notify_scripts' );
 
 class BHA_Widget extends WP_Widget {
 	public function __construct() {
