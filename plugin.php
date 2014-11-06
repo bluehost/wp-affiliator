@@ -2,7 +2,7 @@
 /*
 Plugin Name: Bluehost Affiliator
 Description: This plugin makes it easy for you to add Bluehost affiliate banners to posts using a Bluehost icon above the editor.  You can also add static banners to the sidebar with the widget.  To get started insert your Bluehost Affiliate Username under Settings -> General or <a href="#bha-fancy-content">click here</a>.
-Version: 1.0.5
+Version: 1.0.6
 Author: Mike Hansen
 Author URI: http://mikehansen.me?utm_source=bha_wp_plugin
 License: GPLv2 or later
@@ -413,15 +413,41 @@ function bha_guess_username() {
 	}
 }
 
+function bha_clear_notices( $new, $old ) {
+	if( $new != $old ) {
+		delete_option( 'bha_dismissed_notices' );
+	}
+	return $new;
+}
+add_filter( 'pre_update_option_bha_username', 'bha_clear_notices' );
+
+function bha_is_notice_dismissed( $key ) {
+	$dismissed_notices = get_option( 'bha_dismissed_notices', array() );
+	return ( isset( $dismissed_notices[ $key ] ) && $dismissed_notices[ $key ] ) ? true : false;
+}
+
+function bha_notice_dismiss( $key ) {
+	$dismissed_notices = get_option( 'bha_dismissed_notices', array() );
+	$dismissed_notices[ $key ] = true;
+	update_option( 'bha_dismissed_notices', $dismissed_notices );
+}
+
 function bha_notify_cpanel_user() {
 	$bh_aff = get_option( 'bha_username' );
 	$guess_aff = bha_guess_username();
-	if( $bh_aff == $guess_aff || $bh_aff == "" ) {
-		echo "<div class='updated' style='border-left: 4px solid #3575B9;'><p>Your Bluehost affiliate ID is invalid or not set. <a class='bha-set-aff' href='#bha-fancy-content'>Set Affiliate Username</a></p></div>";
+	$key = md5( $bh_aff . $guess_aff );
+	if( $bh_aff == $guess_aff && ! bha_is_notice_dismissed( $key ) ) {
+		echo "<div class='updated' style='border-left: 4px solid #3575B9;'><p>Your Bluehost affiliate ID matches your cpanel username please confirm your affiliate username is accurate. <a class='bha-set-aff' href='#bha-fancy-content'>Set Affiliate Username</a> <a style='float:right;' href='" . add_query_arg( array( 'bha-dismiss' => $key ) ) . "'>dismiss</a></p></div>";
+	} elseif( $bh_aff == "" ) {
+		echo "<div class='updated' style='border-left: 4px solid #3575B9;'><p>Your Bluehost affiliate ID is empty. <a class='bha-set-aff' href='#bha-fancy-content'>Set Affiliate Username</a></p></div>";
 	}
 }
 
 function bha_notify_scripts() {
+	if( isset( $_GET['bha-dismiss'] ) ) {
+		bha_notice_dismiss( $_GET['bha-dismiss'] );
+		wp_redirect( remove_query_arg( 'bha-dismiss' ) );
+	}
 	$bh_aff = get_option( 'bha_username' );
 	$guess_aff = bha_guess_username();
 	if( $bh_aff == $guess_aff || $bh_aff == "" ) {
