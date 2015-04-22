@@ -2,7 +2,7 @@
 /*
 Plugin Name: Bluehost Affiliator
 Description: This plugin makes it easy for you to add Bluehost affiliate banners to posts using a Bluehost icon above the editor.  You can also add static banners to the sidebar with the widget.  To get started insert your Bluehost Affiliate Username under Settings -> General or <a href="#bha-fancy-content">click here</a>.
-Version: 1.0.6
+Version: 1.0.7
 Author: Mike Hansen
 Author URI: http://mikehansen.me?utm_source=bha_wp_plugin
 License: GPLv2 or later
@@ -437,7 +437,7 @@ function bha_notify_cpanel_user() {
 	$guess_aff = bha_guess_username();
 	$key = md5( $bh_aff . $guess_aff );
 	if( $bh_aff == $guess_aff && ! bha_is_notice_dismissed( $key ) ) {
-		echo "<div class='updated' style='border-left: 4px solid #3575B9;'><p>Your Bluehost affiliate ID matches your cpanel username please confirm your affiliate username is accurate. <a class='bha-set-aff' href='#bha-fancy-content'>Set Affiliate Username</a> <a style='float:right;' href='" . add_query_arg( array( 'bha-dismiss' => $key ) ) . "'>dismiss</a></p></div>";
+		echo "<div class='updated' style='border-left: 4px solid #3575B9;'><p>Your Bluehost affiliate ID matches your cpanel username please confirm your affiliate username is accurate. <a class='bha-set-aff' href='#bha-fancy-content'>Set Affiliate Username</a> <a style='float:right;' href='" . esc_url( add_query_arg( array( 'bha-dismiss' => $key ) ) ) . "'>dismiss</a></p></div>";
 	} elseif( $bh_aff == "" ) {
 		echo "<div class='updated' style='border-left: 4px solid #3575B9;'><p>Your Bluehost affiliate ID is empty. <a class='bha-set-aff' href='#bha-fancy-content'>Set Affiliate Username</a></p></div>";
 	}
@@ -446,7 +446,7 @@ function bha_notify_cpanel_user() {
 function bha_notify_scripts() {
 	if( isset( $_GET['bha-dismiss'] ) ) {
 		bha_notice_dismiss( $_GET['bha-dismiss'] );
-		wp_redirect( remove_query_arg( 'bha-dismiss' ) );
+		wp_redirect( esc_url_raw( remove_query_arg( 'bha-dismiss' ) ) );
 	}
 	$bh_aff = get_option( 'bha_username' );
 	$guess_aff = bha_guess_username();
